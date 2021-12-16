@@ -17,6 +17,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -35,6 +36,7 @@ public:
     QLabel *label_6;
     QLabel *label_7;
     QPushButton *pushButton;
+    QTextBrowser *textBrowser;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -42,12 +44,12 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(391, 189);
+        MainWindow->resize(401, 390);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         label = new QLabel(centralwidget);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(10, 10, 241, 16));
+        label->setGeometry(QRect(10, 10, 161, 16));
         lineEdit = new QLineEdit(centralwidget);
         lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
         lineEdit->setGeometry(QRect(10, 30, 241, 22));
@@ -75,10 +77,13 @@ public:
         pushButton = new QPushButton(centralwidget);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
         pushButton->setGeometry(QRect(260, 30, 121, 24));
+        textBrowser = new QTextBrowser(centralwidget);
+        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setGeometry(QRect(10, 150, 381, 192));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 391, 22));
+        menubar->setGeometry(QRect(0, 0, 401, 22));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
@@ -92,7 +97,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Frames Reader", nullptr));
-        label->setText(QCoreApplication::translate("MainWindow", "\320\243\320\272\320\260\320\266\320\270\321\202\320\265 \320\277\321\203\321\202\321\214 \320\272 \321\204\320\260\320\271\320\273\321\203 ( .log / .pcap):", nullptr));
+        label->setText(QCoreApplication::translate("MainWindow", "\320\243\320\272\320\260\320\266\320\270\321\202\320\265 \320\277\321\203\321\202\321\214 \320\272 \321\204\320\260\320\271\320\273\321\203 ( .log): ", nullptr));
         lineEdit->setText(QString());
         pushButton_2->setText(QCoreApplication::translate("MainWindow", "\320\237\321\200\320\276\321\207\320\270\321\202\320\260\321\202\321\214", nullptr));
         label_2->setText(QCoreApplication::translate("MainWindow", "\320\232\320\276\320\273-\320\262\320\276 \321\204\321\200\320\265\320\271\320\274\320\276\320\262:", nullptr));

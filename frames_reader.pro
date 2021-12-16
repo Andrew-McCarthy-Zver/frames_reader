@@ -1,7 +1,5 @@
 QT       += core gui
 
-INCLUDEPATH += C:/Users/Asus/Downloads/WpdPack/Include
-LIBS += "-LC:/Users/Asus/Downloads/WpdPack/Lib/x64" -lwpcap -lpacket
 
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -14,10 +12,12 @@ CONFIG += c++11
 
 
 SOURCES += \
+    Frame.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    Frame.h \
     mainwindow.h
 
 FORMS += \

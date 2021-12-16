@@ -4,8 +4,9 @@
 #include <QRegularExpression>
 #include <QFile>
 #include "QFileInfo"
-#include <winsock2.h>
-#include <pcap.h>
+#include <QList>
+#include "Frame.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -20,19 +21,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 void MainWindow::on_pushButton_clicked()
 {
     QString path;
-    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log) ;; Pcap Files (*.pcap)");
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
     ui->lineEdit->setText(path);
 }
 
-float LogReader (QString filename,float &packetCount, float &failpacketCount)
-{
 
+
+
+float LogReader (QString filename,float &packetCount, float &failpacketCount, QList <Frame> &frames)
+{
     QRegularExpression re("Offset");
     QRegularExpression rs("FCS=Fail");
+    QRegularExpression rt("Type=");
+    QRegularExpression ta("TA=");
+    QRegularExpression ra("RA=");
+    QRegularExpression ra2("RA/BSSID=");
+    QRegularExpression ta2("TA/BSSID=");
     QFile file(filename);
     if ((file.exists())&&(file.open(QIODevice::ReadOnly)))
         {
@@ -45,9 +52,23 @@ float LogReader (QString filename,float &packetCount, float &failpacketCount)
                 {
                    packetCount=packetCount+1;
                 }
-                if (rs.match(str).hasMatch())
-                {
-                   failpacketCount+=1;
+                if (rs.match(str).hasMatch() || rt.match(str).hasMatch()) {
+                    if (rs.match(str).hasMatch()){
+                       failpacketCount+=1;
+                       frames.append(Frame((int)packetCount,"Не определен","Не определен"));
+                    }
+                    else if ((ta.match(str).hasMatch()||ta2.match(str).hasMatch()) & (ra.match(str).hasMatch()||ra2.match(str).hasMatch())) {
+                       if (ra.match(str).hasMatch()&ta.match(str).hasMatch()) {frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA=")+3,17),str.mid(str.indexOf("RA=")+3,17)));}
+                       if (ra2.match(str).hasMatch()&ta.match(str).hasMatch()){frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA=")+3,17),str.mid(str.indexOf("RA/BSSID=")+9,17)));}
+                       if (ra.match(str).hasMatch()&ta2.match(str).hasMatch()){frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA/BSSID=")+9,17),str.mid(str.indexOf("RA=")+3,17)));}
+                       if (ra2.match(str).hasMatch()&ta2.match(str).hasMatch()){frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA/BSSID=")+9,17),str.mid(str.indexOf("RA/BSSID=")+9,17)));}
+                    } else if (ta.match(str).hasMatch() ||ta2.match(str).hasMatch() ){
+                        if (ta.match(str).hasMatch()) {frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA=")+3,17),"Не определен"));}
+                        else frames.append(Frame((int)packetCount,str.mid(str.indexOf("TA/BSSID=")+9,17),"Не определен"));
+                    } else if (ra.match(str).hasMatch()||ra2.match(str).hasMatch()){
+                        if (ra.match(str).hasMatch()) { frames.append(Frame((int)packetCount,"Не определен",str.mid(str.indexOf("RA=")+3,17)));}
+                        else frames.append(Frame((int)packetCount,"Не определен",str.mid(str.indexOf("RA/BSSID=")+9,17)));
+                    } else frames.append(Frame((int)packetCount,"Не определен","Не определен"));
                 }
             }
             file.close();
@@ -57,27 +78,15 @@ float LogReader (QString filename,float &packetCount, float &failpacketCount)
 
 
 
-float PcapReader (QString filename,u_int &packetCount)
-{
-    char errbuff[PCAP_ERRBUF_SIZE];
-    struct pcap_pkthdr *header;
-    const u_char *data;
-    pcap_t * pcap = pcap_open_offline(qPrintable(filename), errbuff);
-
-    while (int returnValue = pcap_next_ex(pcap, &header, &data) >= 0)
-        {
-             packetCount +=1;
-        }
-    pcap_close(pcap);
-    return packetCount;
-}
-
 
 void MainWindow::on_pushButton_2_clicked()
 {
+
     ui->label_5->setText("");
     ui->label_6->setText("");
     ui->label_7->setText("");
+    ui->textBrowser->setText("");
+    QList <Frame> frames;
     QString filename = ui->lineEdit->text();
     float packetCount = 0;
     float failpacketCount = 0;
@@ -86,19 +95,16 @@ void MainWindow::on_pushButton_2_clicked()
         QMessageBox::critical(this,"Ошибка","Не выбран путь к файлу.");
     }
     else if (fi.suffix() == "log") {
-        packetCount,failpacketCount = LogReader (filename,packetCount,failpacketCount);
+        packetCount,failpacketCount = LogReader (filename,packetCount,failpacketCount,frames);
         ui->label_5->setText(QString::number(packetCount));
         if (packetCount>0) {
              ui->label_6->setText(QString::number(packetCount-failpacketCount)+" ("+QString::number(round(((packetCount-failpacketCount)/packetCount)*100))+"%)");
              ui->label_7->setText(QString::number(failpacketCount)+" ("+QString::number(round(((failpacketCount)/packetCount)*100))+"%)");
+             foreach (Frame fr, frames)
+             {
+                 ui->textBrowser->insertPlainText(QString::number(fr.getNum())+":   TA: "+fr.getTA()+"    RA: "+fr.getRA()+"\n");
+             }
          }
-
-    }
-    else if (fi.suffix() == "pcap")  {
-        u_int packetCount = 0;
-        packetCount = PcapReader(filename,packetCount);
-        ui->label_5->setText(QString::number(packetCount));
-
     }
     else {
         QMessageBox::critical(this,"Ошибка","Неподходящее расширение файла.");
