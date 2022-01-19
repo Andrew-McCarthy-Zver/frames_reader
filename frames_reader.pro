@@ -13,12 +13,18 @@ CONFIG += c++11
 
 SOURCES += \
     Frame.cpp \
+    edge.cpp \
+    graph.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    vertex.cpp
 
 HEADERS += \
     Frame.h \
-    mainwindow.h
+    edge.h \
+    graph.h \
+    mainwindow.h \
+    vertex.h
 
 FORMS += \
     mainwindow.ui

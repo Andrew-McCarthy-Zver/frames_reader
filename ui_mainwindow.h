@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
@@ -37,6 +38,10 @@ public:
     QLabel *label_7;
     QPushButton *pushButton;
     QTextBrowser *textBrowser;
+    QLabel *label_8;
+    QLabel *label_9;
+    QTextBrowser *textBrowser_2;
+    QCheckBox *checkBox;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -44,7 +49,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(401, 390);
+        MainWindow->resize(401, 501);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         label = new QLabel(centralwidget);
@@ -79,7 +84,20 @@ public:
         pushButton->setGeometry(QRect(260, 30, 121, 24));
         textBrowser = new QTextBrowser(centralwidget);
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-        textBrowser->setGeometry(QRect(10, 150, 381, 192));
+        textBrowser->setGeometry(QRect(10, 170, 381, 131));
+        label_8 = new QLabel(centralwidget);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+        label_8->setGeometry(QRect(10, 150, 181, 16));
+        label_9 = new QLabel(centralwidget);
+        label_9->setObjectName(QString::fromUtf8("label_9"));
+        label_9->setGeometry(QRect(10, 300, 101, 16));
+        textBrowser_2 = new QTextBrowser(centralwidget);
+        textBrowser_2->setObjectName(QString::fromUtf8("textBrowser_2"));
+        textBrowser_2->setGeometry(QRect(10, 320, 381, 131));
+        checkBox = new QCheckBox(centralwidget);
+        checkBox->setObjectName(QString::fromUtf8("checkBox"));
+        checkBox->setGeometry(QRect(110, 300, 251, 20));
+        checkBox->setChecked(true);
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -107,6 +125,9 @@ public:
         label_6->setText(QString());
         label_7->setText(QString());
         pushButton->setText(QCoreApplication::translate("MainWindow", "\320\222\321\213\320\261\321\200\320\260\321\202\321\214 \321\204\320\260\320\271\320\273", nullptr));
+        label_8->setText(QCoreApplication::translate("MainWindow", "\320\244\321\200\320\265\320\271\320\274\321\213:", nullptr));
+        label_9->setText(QCoreApplication::translate("MainWindow", "\320\222\320\267\320\260\320\270\320\274\320\276\320\264\320\265\320\271\321\201\321\202\320\262\320\270\321\217:", nullptr));
+        checkBox->setText(QCoreApplication::translate("MainWindow", "\320\235\320\265 \320\276\321\202\320\276\320\261\321\200\320\260\320\266\320\260\321\202\321\214 \320\277\320\260\321\200\321\213 \321\201 0 \320\262\320\267\320\260\320\270\320\274\320\276\320\264\320\265\320\271\321\201\321\202\320\262\320\270\320\271", nullptr));
     } // retranslateUi
 
 };

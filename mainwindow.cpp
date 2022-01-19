@@ -6,8 +6,9 @@
 #include "QFileInfo"
 #include <QList>
 #include "Frame.h"
-
-
+#include "graph.h"
+#include "vertex.h"
+#include "edge.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -77,15 +78,91 @@ float LogReader (QString filename,float &packetCount, float &failpacketCount, QL
 }
 
 
+#include <iostream>
 
-
-void MainWindow::on_pushButton_2_clicked()
-{
-
+void  MainWindow::Restart () {
     ui->label_5->setText("");
+    ui->label_6->setText("");
     ui->label_6->setText("");
     ui->label_7->setText("");
     ui->textBrowser->setText("");
+    ui->textBrowser_2->setText("");
+}
+
+void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph)
+{
+    bool checkV = true;
+    bool checkE = true;
+    foreach (Frame fr, frames)
+    {
+         bool status = true;
+         bool status2 = true;
+         ui->textBrowser->insertPlainText(QString::number(fr.getNum())+":   TA: "+fr.getTA()+"    RA: "+fr.getRA()+"\n");
+         if (checkV) {
+            if ( fr.getRA() != "Не определен" ) {
+                graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA())); checkV = false; }
+            if ( fr.getTA() != "Не определен" ) {
+                graph.addVertex(Vertex(graph.countVertex()+1,fr.getTA())); checkV = false;}
+        }
+        else {
+            foreach (Vertex v, graph.getVertexes())
+            {
+                if (v.Address == fr.getRA() || fr.getRA() == "Не определен") {status = false;}
+                if (v.Address == fr.getTA() || fr.getTA() == "Не определен") {status2 = false;}
+            }
+
+            if (status) { graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA())); }
+            if (status2) { graph.addVertex(Vertex(graph.countVertex()+1,fr.getTA())); }
+        }
+
+        if ( fr.getRA() != "Не определен" && fr.getTA() != "Не определен" )
+        {
+            bool str =  false ;
+            Edge ok = Edge(Vertex(0,""),Vertex(0,""),0);
+            if (!checkE) {
+            foreach (Edge m, graph.getEdges())
+             {
+                 if (m.getFrom().Address == fr.getTA() && m.getTo().Address == fr.getRA())
+                 {
+                     str = true;
+                     ok = m;
+                 }
+             }
+
+             if (str) {graph.countweightedge(ok);}
+             else
+                 {
+                 Vertex p = Vertex (0,"Ошибка");
+                 Vertex k  = Vertex (0,"Ошибка");
+                     foreach (Vertex v, graph.getVertexes())
+                     {
+                         if (v.Address == fr.getRA()) { k = v;}
+                         if (v.Address == fr.getTA()) { p = v;}
+                     }
+                  graph.addEdge(Edge(p,k,1));
+                 }
+            }
+            else
+            {
+            Vertex p = Vertex (0,"Ошибка");
+            Vertex k  = Vertex (0,"Ошибка");
+                foreach (Vertex v, graph.getVertexes())
+                {
+                    if (v.Address == fr.getRA()) { k = v;}
+                    if (v.Address == fr.getTA()) { p = v;}
+                }
+             graph.addEdge(Edge(p,k,1));
+             checkE =  false ;
+            }
+           }
+        }
+
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    Graph graph;
+    Restart();
     QList <Frame> frames;
     QString filename = ui->lineEdit->text();
     float packetCount = 0;
@@ -100,12 +177,24 @@ void MainWindow::on_pushButton_2_clicked()
         if (packetCount>0) {
              ui->label_6->setText(QString::number(packetCount-failpacketCount)+" ("+QString::number(round(((packetCount-failpacketCount)/packetCount)*100))+"%)");
              ui->label_7->setText(QString::number(failpacketCount)+" ("+QString::number(round(((failpacketCount)/packetCount)*100))+"%)");
-             foreach (Frame fr, frames)
-             {
-                 ui->textBrowser->insertPlainText(QString::number(fr.getNum())+":   TA: "+fr.getTA()+"    RA: "+fr.getRA()+"\n");
-             }
+             TakeInfo(frames,graph);
+        }
+             int** matrix;
+             matrix = new int*[graph.countVertex()];
+             for(int k = 0; k < graph.countVertex(); k++)
+                     matrix[k] = new int[graph.countVertex()];
+
+             for(int k = 0; k < graph.countVertex(); k++)
+                 for(int p = 0; p < graph.countVertex(); p++)
+                 {
+                     QString name1 = graph.getNameVertex(k+1);
+                     QString name2 = graph.getNameVertex(p+1);
+                     int weight = graph.get(matrix)[k][p];
+                     if (name1 != name2 && !ui->checkBox->isChecked() ) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +": " + QString::number(weight) +"\n");
+                     else if (weight != 0) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +": " + QString::number(weight) +"\n");
+                 }
          }
-    }
+
     else {
         QMessageBox::critical(this,"Ошибка","Неподходящее расширение файла.");
     }
