@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>401</width>
+    <width>518</width>
     <height>501</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>50</x>
       <y>10</y>
       <width>161</width>
       <height>16</height>
@@ -30,9 +30,9 @@
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>30</y>
-      <width>241</width>
+      <width>301</width>
       <height>22</height>
      </rect>
     </property>
@@ -43,9 +43,9 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>60</y>
-      <width>371</width>
+      <width>431</width>
       <height>24</height>
      </rect>
     </property>
@@ -134,7 +134,7 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>350</x>
       <y>30</y>
       <width>121</width>
       <height>24</height>
@@ -147,9 +147,9 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>170</y>
-      <width>381</width>
+      <width>431</width>
       <height>131</height>
      </rect>
     </property>
@@ -170,7 +170,7 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>300</y>
       <width>101</width>
       <height>16</height>
@@ -183,9 +183,9 @@
    <widget class="QTextBrowser" name="textBrowser_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>40</x>
       <y>320</y>
-      <width>381</width>
+      <width>431</width>
       <height>131</height>
      </rect>
     </property>
@@ -193,7 +193,7 @@
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>220</x>
       <y>300</y>
       <width>251</width>
       <height>20</height>
@@ -206,13 +206,65 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>100</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Кол-во фреймов c TA и RA:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>120</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Кол-во фреймов ,без адресной инфы:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>100</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>120</y>
+      <width>49</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>401</width>
+     <width>518</width>
      <height>22</height>
     </rect>
    </property>

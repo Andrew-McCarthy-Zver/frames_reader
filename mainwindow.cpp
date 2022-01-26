@@ -184,6 +184,7 @@ void MainWindow::on_pushButton_2_clicked()
              for(int k = 0; k < graph.countVertex(); k++)
                      matrix[k] = new int[graph.countVertex()];
 
+             int addframes = 0;
              for(int k = 0; k < graph.countVertex(); k++)
                  for(int p = 0; p < graph.countVertex(); p++)
                  {
@@ -191,8 +192,11 @@ void MainWindow::on_pushButton_2_clicked()
                      QString name2 = graph.getNameVertex(p+1);
                      int weight = graph.get(matrix)[k][p];
                      if (name1 != name2 && !ui->checkBox->isChecked() ) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +": " + QString::number(weight) +"\n");
-                     else if (weight != 0) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +": " + QString::number(weight) +"\n");
+                     else if (weight != 0) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +" : " + QString::number(weight) +"\n");
+                     addframes += weight;
                  }
+              ui->label_12->setText(QString::number(addframes)+" ("+QString::number(round(((addframes)/packetCount)*100))+"%)");
+               ui->label_13->setText(QString::number(packetCount - addframes)+" ("+QString::number(round(((packetCount - addframes)/packetCount)*100))+"%)");
          }
 
     else {
