@@ -8,7 +8,6 @@ public:
     Vertex(int,QString);
     int Number;
     QString Address;
-
 };
 
 #endif // VERTEX_H

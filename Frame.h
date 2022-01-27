@@ -8,11 +8,14 @@ class Frame {
         int getNum() const;
         QString getTA() const;
         QString getRA() const;
+        QString getSSID() const;
+        void setSSID(QString);
 
     private:
         int num;
         QString TA;
         QString RA;
+        QString SSID;
 };
 
 #endif // FRAME_H

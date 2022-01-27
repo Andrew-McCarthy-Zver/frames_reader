@@ -32,11 +32,12 @@ void MainWindow::on_pushButton_clicked()
 
 
 
-float LogReader (QString filename,float &packetCount, float &failpacketCount, QList <Frame> &frames)
+void LogReader (QString filename,float &packetCount, float &failpacketCount, QList <Frame> &frames)
 {
     QRegularExpression re("Offset");
     QRegularExpression rs("FCS=Fail");
     QRegularExpression rt("Type=");
+    QRegularExpression rtm_b("Type=Management/Beacon");
     QRegularExpression ta("TA=");
     QRegularExpression ra("RA=");
     QRegularExpression ra2("RA/BSSID=");
@@ -70,11 +71,16 @@ float LogReader (QString filename,float &packetCount, float &failpacketCount, QL
                         if (ra.match(str).hasMatch()) { frames.append(Frame((int)packetCount,"Не определен",str.mid(str.indexOf("RA=")+3,17)));}
                         else frames.append(Frame((int)packetCount,"Не определен",str.mid(str.indexOf("RA/BSSID=")+9,17)));
                     } else frames.append(Frame((int)packetCount,"Не определен","Не определен"));
+
+                    if (rtm_b.match(str).hasMatch()) {
+                        int ssid_size = str.indexOf("'",str.indexOf("SSID='")+6) - (str.indexOf("SSID='")+6);
+                        frames[frames.size()-1].setSSID(str.mid(str.indexOf("SSID='")+6,ssid_size));
+
+                    }
                 }
             }
             file.close();
         }
-    return packetCount,failpacketCount;
 }
 
 
@@ -89,20 +95,31 @@ void  MainWindow::Restart () {
     ui->textBrowser_2->setText("");
 }
 
-void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph)
+void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td)
 {
     bool checkV = true;
     bool checkE = true;
+    bool checkfirsttd = true;
     foreach (Frame fr, frames)
-    {
+    {    bool checktd = true;
+         if (fr.getSSID() != "NULL" && checkfirsttd) { td.append(fr); checkfirsttd = false;}
+         if (!checkfirsttd) {
+             foreach(Frame fr2, td)
+             {
+                 if (fr.getTA() == fr2.getTA()) checktd = false;
+             }
+             if (checktd && fr.getSSID() != "NULL" )  td.append(fr);
+         }
          bool status = true;
          bool status2 = true;
          ui->textBrowser->insertPlainText(QString::number(fr.getNum())+":   TA: "+fr.getTA()+"    RA: "+fr.getRA()+"\n");
          if (checkV) {
             if ( fr.getRA() != "Не определен" ) {
-                graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA())); checkV = false; }
+                graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA())); checkV = false;  }
             if ( fr.getTA() != "Не определен" ) {
-                graph.addVertex(Vertex(graph.countVertex()+1,fr.getTA())); checkV = false;}
+                graph.addVertex(Vertex(graph.countVertex()+1,fr.getTA())); checkV = false; }
+
+
         }
         else {
             foreach (Vertex v, graph.getVertexes())
@@ -111,7 +128,7 @@ void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph)
                 if (v.Address == fr.getTA() || fr.getTA() == "Не определен") {status2 = false;}
             }
 
-            if (status) { graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA())); }
+            if (status) { graph.addVertex(Vertex(graph.countVertex()+1,fr.getRA()));  }
             if (status2) { graph.addVertex(Vertex(graph.countVertex()+1,fr.getTA())); }
         }
 
@@ -164,6 +181,7 @@ void MainWindow::on_pushButton_2_clicked()
     Graph graph;
     Restart();
     QList <Frame> frames;
+    QList <Frame> td;
     QString filename = ui->lineEdit->text();
     float packetCount = 0;
     float failpacketCount = 0;
@@ -172,12 +190,12 @@ void MainWindow::on_pushButton_2_clicked()
         QMessageBox::critical(this,"Ошибка","Не выбран путь к файлу.");
     }
     else if (fi.suffix() == "log") {
-        packetCount,failpacketCount = LogReader (filename,packetCount,failpacketCount,frames);
+         LogReader (filename,packetCount,failpacketCount,frames);
         ui->label_5->setText(QString::number(packetCount));
         if (packetCount>0) {
              ui->label_6->setText(QString::number(packetCount-failpacketCount)+" ("+QString::number(round(((packetCount-failpacketCount)/packetCount)*100))+"%)");
              ui->label_7->setText(QString::number(failpacketCount)+" ("+QString::number(round(((failpacketCount)/packetCount)*100))+"%)");
-             TakeInfo(frames,graph);
+             TakeInfo(frames,graph,td);
         }
              int** matrix;
              matrix = new int*[graph.countVertex()];
@@ -185,16 +203,50 @@ void MainWindow::on_pushButton_2_clicked()
                      matrix[k] = new int[graph.countVertex()];
 
              int addframes = 0;
+             int tdk = 0;
+             foreach (Frame fr, td) {
+                 tdk++;
+                 int kk = 0;
+             ui->textBrowser_2->insertPlainText("Сеть №" + QString::number(tdk) + " (" + fr.getSSID()  + ") BSSID: " + fr.getTA() +   "\n");
              for(int k = 0; k < graph.countVertex(); k++)
                  for(int p = 0; p < graph.countVertex(); p++)
                  {
                      QString name1 = graph.getNameVertex(k+1);
                      QString name2 = graph.getNameVertex(p+1);
-                     int weight = graph.get(matrix)[k][p];
-                     if (name1 != name2 && !ui->checkBox->isChecked() ) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +": " + QString::number(weight) +"\n");
-                     else if (weight != 0) ui->textBrowser_2->insertPlainText(name1 +" -> " +name2 +" : " + QString::number(weight) +"\n");
-                     addframes += weight;
+
+                     int weight1 = graph.get(matrix)[k][p];
+                     int weight2 = graph.get(matrix)[p][k];
+
+                     if (name1 == fr.getTA() && name1 != name2  && !ui->checkBox->isChecked())
+                     {
+                         kk++; ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                     }
+                     else if (name1 == fr.getTA() && (weight1 != 0 || weight2 !=0) )
+                     {
+                         kk++; ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                     }
+
                  }
+             }
+             ui->textBrowser_2->insertPlainText("Не удалось установить сеть: \n");
+
+             for(int k = 0; k < graph.countVertex(); k++)
+                 for(int p = 0; p < graph.countVertex(); p++)
+                 {
+                     int find = true;
+                     QString name1 = graph.getNameVertex(k+1);
+                     QString name2 = graph.getNameVertex(p+1);
+                     int weight1 = graph.get(matrix)[k][p];
+                     addframes += weight1;
+                     foreach (Frame fr, td) {
+                         if (name1 == fr.getTA() ||  name2 == fr.getTA() )
+                             find = false;
+                     }
+                     if (find && !ui->checkBox->isChecked() && name1 != name2 )
+                     {ui->textBrowser_2->insertPlainText("    "+ name1 +" -> " +name2 +" : " + QString::number(weight1) +"\n");}
+                     else if (find && weight1 != 0) ui->textBrowser_2->insertPlainText("    "+ name1 +" -> " +name2 +" : " + QString::number(weight1) +"\n");
+                 }
+
               ui->label_12->setText(QString::number(addframes)+" ("+QString::number(round(((addframes)/packetCount)*100))+"%)");
                ui->label_13->setText(QString::number(packetCount - addframes)+" ("+QString::number(round(((packetCount - addframes)/packetCount)*100))+"%)");
          }

@@ -45,6 +45,7 @@ QString Graph::getNameVertex(int num) const{
     }
     return "No Address";
 }
+
  void Graph:: countweightedge(Edge edge) {
      int m = 0;
      foreach(Edge e, Edges)

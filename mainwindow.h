@@ -21,7 +21,7 @@ public:
 private slots:
     void on_pushButton_clicked();
     void Restart();
-    void TakeInfo(QList <Frame> &frames, Graph &graph);
+    void TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td);
     void on_pushButton_2_clicked();
 
 private:
