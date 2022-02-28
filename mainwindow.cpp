@@ -178,6 +178,10 @@ void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td
 
 void MainWindow::on_pushButton_2_clicked()
 {
+    QRegularExpression mac1("90:3a:e6");
+    QRegularExpression mac2("38:1d:14");
+    QRegularExpression ssid1("Parrot");
+    QRegularExpression ssid2("Skydio");
     Graph graph;
     Restart();
     QList <Frame> frames;
@@ -207,7 +211,13 @@ void MainWindow::on_pushButton_2_clicked()
              foreach (Frame fr, td) {
                  tdk++;
                  int kk = 0;
-             ui->textBrowser_2->insertPlainText("Сеть №" + QString::number(tdk) + " (" + fr.getSSID()  + ") BSSID: " + fr.getTA() +   "\n");
+             if (mac1.match(fr.getTA()).hasMatch() || mac2.match(fr.getTA()).hasMatch())
+                  ui->textBrowser_2->insertPlainText("Сеть №" + QString::number(tdk) + " (" + fr.getSSID()  + ") BSSID: " + fr.getTA() + "(дрон - совпадение mac)" +   "\n");
+             else
+                  if (ssid1.match(fr.getTA()).hasMatch() || ssid2.match(fr.getTA()).hasMatch())
+                      ui->textBrowser_2->insertPlainText("Сеть №" + QString::number(tdk) + " (" + fr.getSSID()  + ") BSSID: " + fr.getTA() + "(дрон - совпадение ssid)" +   "\n");
+                  else
+                ui->textBrowser_2->insertPlainText("Сеть №" + QString::number(tdk) + " (" + fr.getSSID()  + ") BSSID: " + fr.getTA() +   "\n");
              for(int k = 0; k < graph.countVertex(); k++)
                  for(int p = 0; p < graph.countVertex(); p++)
                  {
@@ -219,11 +229,23 @@ void MainWindow::on_pushButton_2_clicked()
 
                      if (name1 == fr.getTA() && name1 != name2  && !ui->checkBox->isChecked())
                      {
-                         kk++; ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         kk++;
+                         if (mac1.match(name2).hasMatch() || mac2.match(name2).hasMatch())
+                             ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ")[дрон - совпадение mac] " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         else if (ssid1.match(name2).hasMatch() || ssid2.match(name2).hasMatch())
+                             ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ")[дрон - совпадение ssid] " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         else
+                            ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
                      }
                      else if (name1 == fr.getTA() && (weight1 != 0 || weight2 !=0) )
                      {
-                         kk++; ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         kk++;
+                         if (mac1.match(name2).hasMatch() || mac2.match(name2).hasMatch())
+                             ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ")[дрон - совпадение mac] " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         else if (ssid1.match(name2).hasMatch() || ssid2.match(name2).hasMatch())
+                             ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ")[дрон - совпадение ssid] " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
+                         else
+                            ui->textBrowser_2->insertPlainText("    Клиент №" + QString::number(kk) + " (" + name2  + ") " + "  Принято: " + QString::number(weight1) + "   Передано: " + QString::number(weight2) +   "\n");
                      }
 
                  }
