@@ -50,6 +50,7 @@ public:
     QFrame *line;
     QFrame *line_2;
     QFrame *line_3;
+    QTextBrowser *textBrowser_3;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -57,7 +58,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(521, 501);
+        MainWindow->resize(526, 717);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         label = new QLabel(centralwidget);
@@ -133,10 +134,13 @@ public:
         line_3->setGeometry(QRect(240, 90, 21, 61));
         line_3->setFrameShape(QFrame::VLine);
         line_3->setFrameShadow(QFrame::Sunken);
+        textBrowser_3 = new QTextBrowser(centralwidget);
+        textBrowser_3->setObjectName(QString::fromUtf8("textBrowser_3"));
+        textBrowser_3->setGeometry(QRect(40, 480, 431, 131));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 521, 22));
+        menubar->setGeometry(QRect(0, 0, 526, 22));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));

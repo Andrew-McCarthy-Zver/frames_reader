@@ -9,7 +9,7 @@
 #include "graph.h"
 #include "vertex.h"
 #include "edge.h"
-
+#include <iostream>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -38,18 +38,29 @@ void LogReader (QString filename,float &packetCount, float &failpacketCount, QLi
     QRegularExpression rs("FCS=Fail");
     QRegularExpression rt("Type=");
     QRegularExpression rtm_b("Type=Management/Beacon");
+    QRegularExpression rtd("Type=Data");
     QRegularExpression ta("TA=");
     QRegularExpression ra("RA=");
     QRegularExpression ra2("RA/BSSID=");
     QRegularExpression ta2("TA/BSSID=");
+    QRegularExpression sz("Size=");
+    QRegularExpression m_f("More Fragments=");
+    QRegularExpression sn("Seqnum");
+    QRegularExpression frag("Fragnum=");
+
     QFile file(filename);
     if ((file.exists())&&(file.open(QIODevice::ReadOnly)))
-        {
+        {      QString size = "5";
             QString str="";
             while(!file.atEnd())
             {
-
                 str=file.readLine();
+
+                if (sz.match(str).hasMatch()) {
+                    size = str.mid(str.indexOf("Size=")+5,5);
+                }
+
+
                 if (re.match(str).hasMatch())
                 {
                    packetCount=packetCount+1;
@@ -77,6 +88,16 @@ void LogReader (QString filename,float &packetCount, float &failpacketCount, QLi
                         frames[frames.size()-1].setSSID(str.mid(str.indexOf("SSID='")+6,ssid_size));
 
                     }
+                    if (rtd.match(str).hasMatch()) {
+                        frames[frames.size()-1].setDATA("data");
+                        int sn_size = str.indexOf(",",str.indexOf("Seqnum=")+7) - (str.indexOf("Seqnum=")+7);
+                        frames[frames.size()-1].setSeqnum(str.mid(str.indexOf("Seqnum=")+7,sn_size));
+                        int m_f_size = str.indexOf(",",str.indexOf("More Fragments=")+15) - (str.indexOf("More Fragments=")+15);
+                        frames[frames.size()-1].setMore_Fragments(str.mid(str.indexOf("More Fragments=")+15,m_f_size));
+                        frames[frames.size()-1].setsize(size.toInt());
+                        int frag_size = str.indexOf(",",str.indexOf("Fragnum=")+8) - (str.indexOf("Fragnum=")+8);
+                        frames[frames.size()-1].setFragnum((str.mid(str.indexOf("Fragnum=")+8,frag_size)).toInt());
+                    }
                 }
             }
             file.close();
@@ -93,15 +114,18 @@ void  MainWindow::Restart () {
     ui->label_7->setText("");
     ui->textBrowser->setText("");
     ui->textBrowser_2->setText("");
+    ui->textBrowser_3->setText("");
 }
 
-void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td)
+void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td, QList <Frame> &data)
 {
     bool checkV = true;
     bool checkE = true;
     bool checkfirsttd = true;
     foreach (Frame fr, frames)
-    {    bool checktd = true;
+    {
+        if (fr.getDATA() !="NULL" && fr.getRA() != "Не определен" && fr.getTA() != "Не определен"  ){data.append(fr);}
+        bool checktd = true;
          if (fr.getSSID() != "NULL" && checkfirsttd) { td.append(fr); checkfirsttd = false;}
          if (!checkfirsttd) {
              foreach(Frame fr2, td)
@@ -178,6 +202,7 @@ void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td
 
 void MainWindow::on_pushButton_2_clicked()
 {
+
     QRegularExpression mac1("90:3a:e6");
     QRegularExpression mac2("38:1d:14");
     QRegularExpression ssid1("Parrot");
@@ -186,6 +211,8 @@ void MainWindow::on_pushButton_2_clicked()
     Restart();
     QList <Frame> frames;
     QList <Frame> td;
+    QList <Frame> data;
+    QList <Frame> da;
     QString filename = ui->lineEdit->text();
     float packetCount = 0;
     float failpacketCount = 0;
@@ -199,7 +226,49 @@ void MainWindow::on_pushButton_2_clicked()
         if (packetCount>0) {
              ui->label_6->setText(QString::number(packetCount-failpacketCount)+" ("+QString::number(round(((packetCount-failpacketCount)/packetCount)*100))+"%)");
              ui->label_7->setText(QString::number(failpacketCount)+" ("+QString::number(round(((failpacketCount)/packetCount)*100))+"%)");
-             TakeInfo(frames,graph,td);
+             TakeInfo(frames,graph,td,data);
+             bool checkfirstda = true;
+             foreach(Frame fr,data) {
+
+                if (checkfirstda) {da.append(fr); checkfirstda = false;}
+                bool checkda = true;
+                if (!checkfirstda) {
+                foreach (Frame f,da) {
+                    if (f.getTA() == fr.getTA()) {checkda = false;}
+                }
+                if (checkda) {da.append(fr);}
+                }
+             }
+             bool MoreFragment = true;
+             int numframe;
+             int Fragnum;
+             int number = 0;
+             int koef = 0;
+             int counter = 1;
+             int count = 0;
+             foreach (Frame fr,data)
+             {
+
+             if (fr.getMore_Fragments()!="0") { if(MoreFragment) {numframe =  number-koef; MoreFragment = false; Fragnum = fr.getFragnum(); } else if (Fragnum < fr.getFragnum() ) { data[numframe].setsize(data[numframe].getsize()+fr.getsize()); data.removeAt( number-koef); koef ++;} else if (Fragnum == fr.getFragnum()) {numframe = number-koef;} }
+            number ++;
+             }
+             foreach (Frame fr,data)
+             {
+
+
+             if (count > 0)  {for (int vr = 1; vr<=counter; vr++) {if (fr.getSeqnum() == data[count-vr].getSeqnum() && fr.getRA() == data[count-vr].getRA() && fr.getTA() == data[count-vr].getTA()) {data.removeAt(count); count = count -1; counter--;  }}
+             if (counter < 8) counter ++; }
+               count ++;
+             }
+             foreach (Frame k, da) {
+                 ui->textBrowser_3->insertPlainText("Устройство: " + k.getTA() + ": \n");
+             foreach(Frame fr,data) {
+                 if (k.getTA() == fr.getTA() && fr.getRA() !="ff:ff:ff:ff:ff:ff")
+                  ui->textBrowser_3->insertPlainText("  Получатель: " + fr.getRA() + " Рзамер: " + QString::number(fr.getsize()) + "\n");
+              }
+
+              }
+
         }
              int** matrix;
              matrix = new int*[graph.countVertex()];
@@ -271,7 +340,8 @@ void MainWindow::on_pushButton_2_clicked()
 
               ui->label_12->setText(QString::number(addframes)+" ("+QString::number(round(((addframes)/packetCount)*100))+"%)");
                ui->label_13->setText(QString::number(packetCount - addframes)+" ("+QString::number(round(((packetCount - addframes)/packetCount)*100))+"%)");
-         }
+
+    }
 
     else {
         QMessageBox::critical(this,"Ошибка","Неподходящее расширение файла.");
