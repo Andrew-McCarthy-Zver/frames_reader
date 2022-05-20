@@ -10,6 +10,9 @@
 #include "vertex.h"
 #include "edge.h"
 #include <iostream>
+
+QDateTime createdtime;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -25,7 +28,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     QString path;
-    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/Users/Asus/Desktop/doc/СТЦ/drones","All Files (*.*) ;; Log Files (*.log))");
     ui->lineEdit->setText(path);
 }
 
@@ -44,20 +47,29 @@ void LogReader (QString filename,float &packetCount, float &failpacketCount, QLi
     QRegularExpression ra2("RA/BSSID=");
     QRegularExpression ta2("TA/BSSID=");
     QRegularExpression sz("Size=");
+    QRegularExpression tm("Offset=");
     QRegularExpression m_f("More Fragments=");
     QRegularExpression sn("Seqnum");
     QRegularExpression frag("Fragnum=");
 
     QFile file(filename);
+    QFileInfo file1(filename);
     if ((file.exists())&&(file.open(QIODevice::ReadOnly)))
-        {      QString size = "5";
+        {      QString size = "";
+                QString time = "";
             QString str="";
+            createdtime = file1.birthTime();
+
             while(!file.atEnd())
             {
                 str=file.readLine();
 
                 if (sz.match(str).hasMatch()) {
                     size = str.mid(str.indexOf("Size=")+5,5);
+                }
+                if (tm.match(str).hasMatch()) {
+                    int time_size = str.indexOf(",",str.indexOf("Offset=")+7) - (str.indexOf("Offset=")+7);
+                    time = str.mid(str.indexOf("Offset=")+7,time_size);
                 }
 
 
@@ -95,6 +107,7 @@ void LogReader (QString filename,float &packetCount, float &failpacketCount, QLi
                         int m_f_size = str.indexOf(",",str.indexOf("More Fragments=")+15) - (str.indexOf("More Fragments=")+15);
                         frames[frames.size()-1].setMore_Fragments(str.mid(str.indexOf("More Fragments=")+15,m_f_size));
                         frames[frames.size()-1].setsize(size.toInt());
+                        frames[frames.size()-1].setTime(time.toDouble());
                         int frag_size = str.indexOf(",",str.indexOf("Fragnum=")+8) - (str.indexOf("Fragnum=")+8);
                         frames[frames.size()-1].setFragnum((str.mid(str.indexOf("Fragnum=")+8,frag_size)).toInt());
                     }
@@ -262,10 +275,13 @@ void MainWindow::on_pushButton_2_clicked()
              }
              foreach (Frame k, da) {
                  ui->textBrowser_3->insertPlainText("Устройство: " + k.getTA() + ": \n");
+                 int mtu = 0;
              foreach(Frame fr,data) {
-                 if (k.getTA() == fr.getTA() && fr.getRA() !="ff:ff:ff:ff:ff:ff")
-                  ui->textBrowser_3->insertPlainText("  Получатель: " + fr.getRA() + " Рзамер: " + QString::number(fr.getsize()) + "\n");
+                 if (k.getTA() == fr.getTA() && fr.getRA() !="ff:ff:ff:ff:ff:ff") {
+                  if (fr.getsize() > mtu) mtu = fr.getsize();
+                  ui->textBrowser_3->insertPlainText("  Получатель: " + fr.getRA() + " Рзамер: " + QString::number(fr.getsize()) + " Время: " + createdtime.addSecs(fr.getTime()).time().toString() + " MTU: " + QString::number(mtu) + "\n");
               }
+                 }
 
               }
 

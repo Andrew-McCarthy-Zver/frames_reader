@@ -14,12 +14,14 @@ class Frame {
         QString getMore_Fragments() const;
         QString getSeqnum() const;
         int getFragnum() const;
+        int getTime() const;
         void setSSID(QString);
         void setDATA(QString);
         void setsize(int);
         void setMore_Fragments(QString);
         void setSeqnum(QString);
         void setFragnum(int);
+        void setTime(int);
 
     private:
         int num;
@@ -31,6 +33,7 @@ class Frame {
         QString More_Fragments;
         QString Seqnum;
         int Fragnum;
+        int Time;
 
 };
 

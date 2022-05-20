@@ -12,6 +12,7 @@ Frame::Frame(int n,QString ta, QString ra) {
     More_Fragments = "NULL";
     Seqnum = "NULL";
     Fragnum = 0;
+    Time = 0;
 
 }
 
@@ -71,3 +72,11 @@ int Frame::getFragnum() const {
 void Frame::setFragnum(int fragnum) {
     Fragnum = fragnum;
 }
+int Frame::getTime() const {
+
+    return Time;
+}
+void Frame::setTime(int time) {
+    Time = time;
+}
+
