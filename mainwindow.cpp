@@ -31,7 +31,44 @@ void MainWindow::on_pushButton_clicked()
     path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/Users/Asus/Desktop/doc/СТЦ/drones","All Files (*.*) ;; Log Files (*.log))");
     ui->lineEdit->setText(path);
 }
+void MainWindow::on_pushButton_3_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
+    ui->lineEdit_2->setText(path);
+}
+void MainWindow::on_pushButton_4_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
+    ui->lineEdit_3->setText(path);
+}
+void MainWindow::on_pushButton_5_clicked()
+{
+    QString filename_1 = ui->lineEdit_2->text();
+    QString filename_2 = ui->lineEdit_3->text();
+    QString filename_3 = filename_2;
+    QRegularExpression f("/fram.+.log");
+    filename_3.remove(f);
+    QFile file_1(filename_1);
+    QFile file_2(filename_2);
+    QFile file_3(filename_3+"/frames.log");
+    if ((file_1.exists())&&(file_1.open(QIODevice::ReadOnly)) && (file_2.exists())&&(file_2.open(QIODevice::ReadOnly))&& (file_3.open(QIODevice::WriteOnly)) )
+        {
+            QString str_1="";
+            QString str_2="";
+            QTextStream out(&file_3);
+            while(!file_1.atEnd())
+            {
+                str_1=file_1.readLine();
+                str_2=file_2.readLine();
+                out << str_2 << "\n"<< str_1 << "\n";
+            }
 
+        }
+
+
+}
 
 
 
@@ -65,7 +102,8 @@ void LogReader (QString filename,float &packetCount, float &failpacketCount, QLi
                 str=file.readLine();
 
                 if (sz.match(str).hasMatch()) {
-                    size = str.mid(str.indexOf("Size=")+5,5);
+                    int size_size = str.indexOf(",",str.indexOf("Size=")+5) - (str.indexOf("Size=")+5);
+                    size = str.mid(str.indexOf("Size=")+5,size_size);
                 }
                 if (tm.match(str).hasMatch()) {
                     int time_size = str.indexOf(",",str.indexOf("Offset=")+7) - (str.indexOf("Offset=")+7);
@@ -262,7 +300,8 @@ void MainWindow::on_pushButton_2_clicked()
              foreach (Frame fr,data)
              {
 
-             if (fr.getMore_Fragments()!="0") { if(MoreFragment) {numframe =  number-koef; MoreFragment = false; Fragnum = fr.getFragnum(); } else if (Fragnum < fr.getFragnum() ) { data[numframe].setsize(data[numframe].getsize()+fr.getsize()); data.removeAt( number-koef); koef ++;} else if (Fragnum == fr.getFragnum()) {numframe = number-koef;} }
+            if (fr.getMore_Fragments()!="0") { if(MoreFragment) {numframe =  number-koef; MoreFragment = false; Fragnum = fr.getFragnum(); } else if (Fragnum < fr.getFragnum() ) { data[numframe].setsize(data[numframe].getsize()+fr.getsize()); data.removeAt( number-koef); koef ++;} else if (Fragnum == fr.getFragnum()) {numframe = number-koef;} }
+
             number ++;
              }
              foreach (Frame fr,data)
@@ -276,9 +315,15 @@ void MainWindow::on_pushButton_2_clicked()
              foreach (Frame k, da) {
                  ui->textBrowser_3->insertPlainText("Устройство: " + k.getTA() + ": \n");
                  int mtu = 0;
+                 int num = 0;
+                 bool prints = false;
+                 int n_size[3];
              foreach(Frame fr,data) {
                  if (k.getTA() == fr.getTA() && fr.getRA() !="ff:ff:ff:ff:ff:ff") {
-                  if (fr.getsize() > mtu) mtu = fr.getsize();
+                  if (fr.getsize() > mtu) {mtu = fr.getsize(); num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;  }
+                  if (fr.getsize() < mtu) {num++; if (num == 1) n_size[0] = fr.getsize(); if (num == 2) n_size[1] = fr.getsize(); if (num == 3) n_size[2] = fr.getsize(); }
+                  if (fr.getsize() == mtu && num > 0 && num < 4) { ui->textBrowser_4->insertPlainText("Найден отпечаток типа " + QString::number(num) + "\n"); if (num == 1)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n"); if (num == 2)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n" + "Размер: " + QString::number(n_size[1]) + "\n"); if (num == 3)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n" + "Размер: " + QString::number(n_size[1]) + "\n" + "Размер: " + QString::number(n_size[2]) + "\n"); num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;}
+                  if (fr.getsize() == mtu) {num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;}
                   ui->textBrowser_3->insertPlainText("  Получатель: " + fr.getRA() + " Рзамер: " + QString::number(fr.getsize()) + " Время: " + createdtime.addSecs(fr.getTime()).time().toString() + " MTU: " + QString::number(mtu) + "\n");
               }
                  }
