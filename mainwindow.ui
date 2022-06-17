@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>924</width>
-    <height>717</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -147,7 +147,7 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>170</y>
       <width>431</width>
       <height>131</height>
@@ -157,7 +157,7 @@
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>150</y>
       <width>181</width>
       <height>16</height>
@@ -170,8 +170,8 @@
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>300</y>
+      <x>480</x>
+      <y>150</y>
       <width>101</width>
       <height>16</height>
      </rect>
@@ -183,8 +183,8 @@
    <widget class="QTextBrowser" name="textBrowser_2">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>320</y>
+      <x>480</x>
+      <y>170</y>
       <width>431</width>
       <height>131</height>
      </rect>
@@ -193,8 +193,8 @@
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>300</y>
+      <x>650</x>
+      <y>150</y>
       <width>261</width>
       <height>20</height>
      </rect>
@@ -237,7 +237,7 @@
      <rect>
       <x>410</x>
       <y>90</y>
-      <width>51</width>
+      <width>71</width>
       <height>16</height>
      </rect>
     </property>
@@ -250,7 +250,7 @@
      <rect>
       <x>470</x>
       <y>110</y>
-      <width>49</width>
+      <width>71</width>
       <height>16</height>
      </rect>
     </property>
@@ -263,7 +263,7 @@
      <rect>
       <x>-10</x>
       <y>140</y>
-      <width>541</width>
+      <width>931</width>
       <height>20</height>
      </rect>
     </property>
@@ -276,7 +276,7 @@
      <rect>
       <x>-50</x>
       <y>80</y>
-      <width>531</width>
+      <width>591</width>
       <height>20</height>
      </rect>
     </property>
@@ -300,8 +300,8 @@
    <widget class="QTextBrowser" name="textBrowser_3">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>480</y>
+      <x>10</x>
+      <y>320</y>
       <width>431</width>
       <height>131</height>
      </rect>
@@ -310,8 +310,8 @@
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>160</y>
+      <x>630</x>
+      <y>30</y>
       <width>251</width>
       <height>16</height>
      </rect>
@@ -323,8 +323,8 @@
    <widget class="QLineEdit" name="lineEdit_2">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>200</y>
+      <x>580</x>
+      <y>50</y>
       <width>71</width>
       <height>22</height>
      </rect>
@@ -336,8 +336,8 @@
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>200</y>
+      <x>660</x>
+      <y>50</y>
       <width>121</width>
       <height>24</height>
      </rect>
@@ -349,8 +349,8 @@
    <widget class="QLineEdit" name="lineEdit_3">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>240</y>
+      <x>580</x>
+      <y>80</y>
       <width>71</width>
       <height>22</height>
      </rect>
@@ -362,8 +362,8 @@
    <widget class="QPushButton" name="pushButton_4">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>240</y>
+      <x>660</x>
+      <y>80</y>
       <width>121</width>
       <height>24</height>
      </rect>
@@ -375,10 +375,10 @@
    <widget class="QPushButton" name="pushButton_5">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>280</y>
-      <width>171</width>
-      <height>24</height>
+      <x>790</x>
+      <y>50</y>
+      <width>81</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -389,10 +389,72 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>400</y>
+      <y>320</y>
       <width>431</width>
       <height>131</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="Line" name="line_4">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>0</y>
+      <width>21</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_15">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>300</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Передача данных:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_16">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>300</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Найденные отпечатки:</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="textBrowser_5">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>480</y>
+      <width>261</width>
+      <height>81</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_17">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>460</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Размер опорных точек:</string>
     </property>
    </widget>
   </widget>

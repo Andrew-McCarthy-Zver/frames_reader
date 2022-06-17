@@ -166,6 +166,8 @@ void  MainWindow::Restart () {
     ui->textBrowser->setText("");
     ui->textBrowser_2->setText("");
     ui->textBrowser_3->setText("");
+    ui->textBrowser_4->setText("");
+    ui->textBrowser_5->setText("");
 }
 
 void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td, QList <Frame> &data)
@@ -251,6 +253,12 @@ void MainWindow::TakeInfo(QList <Frame> &frames, Graph &graph, QList <Frame> &td
 
 }
 
+struct Pivot
+{
+    int kandidat;
+    int amount;
+} piv;
+
 void MainWindow::on_pushButton_2_clicked()
 {
 
@@ -297,6 +305,7 @@ void MainWindow::on_pushButton_2_clicked()
              int koef = 0;
              int counter = 1;
              int count = 0;
+
              foreach (Frame fr,data)
              {
 
@@ -314,6 +323,8 @@ void MainWindow::on_pushButton_2_clicked()
              }
              foreach (Frame k, da) {
                  ui->textBrowser_3->insertPlainText("Устройство: " + k.getTA() + ": \n");
+                 ui->textBrowser_4->insertPlainText("Устройство: " + k.getTA() + ": \n");
+                  QList <Pivot> pivot;
                  int mtu = 0;
                  int num = 0;
                  bool prints = false;
@@ -322,13 +333,34 @@ void MainWindow::on_pushButton_2_clicked()
                  if (k.getTA() == fr.getTA() && fr.getRA() !="ff:ff:ff:ff:ff:ff") {
                   if (fr.getsize() > mtu) {mtu = fr.getsize(); num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;  }
                   if (fr.getsize() < mtu) {num++; if (num == 1) n_size[0] = fr.getsize(); if (num == 2) n_size[1] = fr.getsize(); if (num == 3) n_size[2] = fr.getsize(); }
-                  if (fr.getsize() == mtu && num > 0 && num < 4) { ui->textBrowser_4->insertPlainText("Найден отпечаток типа " + QString::number(num) + "\n"); if (num == 1)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n"); if (num == 2)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n" + "Размер: " + QString::number(n_size[1]) + "\n"); if (num == 3)  ui->textBrowser_4->insertPlainText("Размер: " + QString::number(n_size[0]) + "\n" + "Размер: " + QString::number(n_size[1]) + "\n" + "Размер: " + QString::number(n_size[2]) + "\n"); num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;}
+                  if (fr.getsize() == mtu && num > 0 && num < 4)
+                  {
+                      ui->textBrowser_4->insertPlainText(" Найден отпечаток типа " + QString::number(num) + "\n");
+                      int r = 0;
+                      if (num == 1) { ui->textBrowser_4->insertPlainText(" Размер: " + QString::number(n_size[0]) + "\n"); if (pivot.empty()) {struct Pivot tmp; tmp.kandidat = n_size[0]; tmp.amount =1; pivot.append(tmp);} else {bool m = true; foreach (Pivot k,pivot) {if (k.kandidat == n_size[0]) { pivot[r].amount = k.amount+1; m = false;} r++;} if (m) {struct Pivot tmp; tmp.kandidat = n_size[0]; tmp.amount =1; pivot.append(tmp);}} }
+                      if (num == 2)  {ui->textBrowser_4->insertPlainText(" Размер: " + QString::number(n_size[0]) + "\n" + "   Размер: " + QString::number(n_size[1]) + "\n"); if (pivot.empty()) {struct Pivot tmp; tmp.kandidat = n_size[1]; tmp.amount =1; pivot.append(tmp);} else {bool m = true; foreach (Pivot k,pivot) {if (k.kandidat == n_size[1]) { pivot[r].amount= k.amount+1; m = false;}r++;} if (m) {struct Pivot tmp; tmp.kandidat = n_size[1]; tmp.amount =1; pivot.append(tmp);}} }
+                      if (num == 3) { ui->textBrowser_4->insertPlainText(" Размер: " + QString::number(n_size[0]) + "\n" + "   Размер: " + QString::number(n_size[1]) + "\n" + "   Размер: " + QString::number(n_size[2]) + "\n"); if (pivot.empty()) {struct Pivot tmp; tmp.kandidat = n_size[2]; tmp.amount =1; pivot.append(tmp);} else {bool m = true; foreach (Pivot k,pivot) {if (k.kandidat == n_size[2]) { pivot[r].amount= k.amount+1; m = false;}r++;} if (m) {struct Pivot tmp; tmp.kandidat = n_size[2]; tmp.amount =1; pivot.append(tmp);}} }
+                      num = 0;
+                      n_size[0] = 0;
+                      n_size[1] = 0;
+                      n_size[2] = 0;
+                  }
                   if (fr.getsize() == mtu) {num = 0; n_size[0] = 0; n_size[1] = 0; n_size[2] = 0;}
                   ui->textBrowser_3->insertPlainText("  Получатель: " + fr.getRA() + " Рзамер: " + QString::number(fr.getsize()) + " Время: " + createdtime.addSecs(fr.getTime()).time().toString() + " MTU: " + QString::number(mtu) + "\n");
               }
                  }
-
+             int pivot_size = 0;
+             int amount = 0;
+             bool pivot_check = true;
+             foreach (Pivot k, pivot)
+             {
+                 if (pivot_check) {pivot_size = k.kandidat; amount = k.amount; pivot_check = false;}
+                 else {if (k.amount > amount) {pivot_size = k.kandidat; amount = k.amount;}}
+             }
+                if (mtu>1499) {ui->textBrowser_5->insertPlainText("Устройство: " + k.getTA() + ": \n");
+                ui->textBrowser_5->insertPlainText(" Размер опорной точки: " + QString::number(pivot_size) + "\n");}
               }
+
 
         }
              int** matrix;
