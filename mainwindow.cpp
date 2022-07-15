@@ -431,7 +431,6 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
         ui->textBrowser_5->insertPlainText("Устройство: " +devices[0][0].ta + ":\n");
         int k = 1;
         double mtu = 0;
-        QList<int> pivotsizes;
         foreach(QList<Frame> sample,devices)
         {
             ui->textBrowser_5->insertPlainText("    Выборка № "+QString::number(k)+":\n");
@@ -441,6 +440,8 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
             double med[sample.size()];
             double offsets[sample.size()];
             int allsize = 0;
+            double pivotsize = 0;
+            bool notpivotsize = false;
             foreach(Frame fr, sample)
             {
                 allsize += fr.size;
@@ -450,21 +451,33 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
                 if (count==1 && sample.size()>count+1)
                 {
                     if (fr.size < mtu && sample[count+1].size == mtu && sample[count-1].size==mtu )
-                    {pivotsizes.append(fr.size); ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");}
+                    {
+                        ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");
+                        if (pivotsize==0||fr.size == pivotsize) { pivotsize = fr.size; }
+                        else {notpivotsize = true;}
+                    }
                     else
                     ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+"\n");
                 }
                 else if (count ==2 && sample.size()>count+1)
                 {
                     if (fr.size < mtu && sample[count+1].size == mtu && (sample[count-1].size==mtu||sample[count-2].size==mtu) )
-                    {pivotsizes.append(fr.size); ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");}
+                    {
+                        ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");
+                        if (pivotsize==0||fr.size == pivotsize) { pivotsize = fr.size; }
+                        else {notpivotsize = true;}
+                    }
                     else
                     ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+"\n");
                 }
                 else if (count>2 && count <19 && sample.size()>count+1)
                 {
                     if (fr.size < mtu && sample[count+1].size == mtu && (sample[count-1].size==mtu||sample[count-2].size==mtu|| sample[count-3].size==mtu) )
-                    {pivotsizes.append(fr.size); ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");}
+                    {
+                        ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+" [*]\n");
+                        if (pivotsize==0||fr.size == pivotsize) { pivotsize = fr.size; }
+                        else {notpivotsize = true;}
+                    }
                     else
                     ui->textBrowser_5->insertPlainText("            Получатель: " + fr.ra + " Размер: "+QString::number(fr.size)+" Время:"+createdtime.addSecs(fr.offset).time().toString()+"\n");
                 }
@@ -473,13 +486,8 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
                 count++;
 
             }
+            if (notpivotsize) pivotsize = 0;
             ui->textBrowser_6->insertPlainText("  Уникальные функции: \n");
-            double pivotsize = 0;
-            int size_count = 0;
-            foreach (int size, pivotsizes)
-            {
-                if (pivotsizes.count(size)> size_count) {size_count = pivotsizes.count(size); pivotsize = size;}
-            }
             ui->textBrowser_6->insertPlainText("    pivot size: " + QString::number(pivotsize) + " \n");
             double pm = pivotsize/mtu;
             ui->textBrowser_6->insertPlainText("    PM: " + QString::number(pm) + " \n");
