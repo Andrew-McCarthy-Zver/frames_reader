@@ -4,6 +4,7 @@
 #include "QMessageBox"
 #include <QRegularExpression>
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -35,6 +36,72 @@ void MainWindow::on_pushButton_4_clicked()
     path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
     ui->lineEdit_3->setText(path);
 }
+void MainWindow::on_pushButton_6_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
+    ui->lineEdit_4->setText(path);
+}
+void MainWindow::on_pushButton_8_clicked()
+{
+    QString path;
+    path = QFileDialog::getOpenFileName(this,"Выбор файла","C:/","All Files (*.*) ;; Log Files (*.log))");
+    ui->lineEdit_5->setText(path);
+
+}
+
+const QString allFileToString(QFile &aFile)
+{
+    if (!aFile.open(QFile::ReadOnly | QFile::Text)) {
+        std::cout << "Error opening file!" << std::endl;
+        return NULL;
+    }
+    QTextStream in(&aFile);
+    return in.readAll();
+}
+
+void MainWindow::on_pushButton_7_clicked()
+{
+    QString path = ui->lineEdit_4->text();
+    QFile file(path);
+    QStringList aStringList = allFileToString(file).split("\n");
+    size_t col_line = aStringList.size() - 1; // Count of line
+    size_t col_digits = aStringList.at(0).count(" ") + 1; // Count of digits in line
+    alglib::decisionforestbuilder builder;
+    alglib::ae_int_t nvars = 27;
+    alglib::ae_int_t nclasses = 2;
+    alglib::real_2d_array train;
+    alglib::ae_int_t npoints;
+    npoints = col_line;
+    train.setlength(npoints,nvars+1);
+    for (size_t i = 0; i < col_line; ++i) {
+           for (size_t j = 0; j < col_digits; ++j) {
+               train(i,j) = aStringList.at(i).split(" ").at(j).toInt();
+           }
+       }
+    dfbuildercreate(builder);
+    dfbuildersetdataset(builder, train, npoints, nvars, nclasses);
+    alglib::ae_int_t ntrees = 100;
+    alglib::decisionforest forest;
+    alglib::dfreport rep;
+    dfbuilderbuildrandomforest(builder, ntrees, forest, rep);
+    QString path_2 = ui->lineEdit_5->text();
+    QFile file_2(path_2);
+    QStringList aStringList_2 = allFileToString(file_2).split("\n");
+    size_t col_line_2 = aStringList_2.size(); // Count of line
+    size_t col_digits_2 = aStringList_2.at(0).count(" ") + 1;
+    alglib::real_1d_array e;
+    e.setlength(27);
+    for (size_t i = 0; i < col_line_2; ++i) {
+           for (size_t j = 0; j < col_digits_2; ++j) {
+               e(j) = aStringList_2.at(i).split(" ").at(j).toInt();
+           }
+           alglib::ae_int_t v;
+           v = dfclassify(forest, e);
+           ui->textBrowser_7->insertPlainText("Выборка №" + QString::number(i+1)+": "+QString::number(v)+"\n");
+       }
+}
+
 void MainWindow::on_pushButton_5_clicked()
 {
     QString filename_1 = ui->lineEdit_2->text();
@@ -328,7 +395,7 @@ int compare(const void *a, const void *b)
     }
 }
 
-void  MainWindow::Standartfunction (double med[],int count)
+void  MainWindow::Standartfunction (double med[],int count, func &f,int k)
 {
     qsort(med, count, sizeof(double), compare);
     double mean = 0;
@@ -372,6 +439,34 @@ void  MainWindow::Standartfunction (double med[],int count)
     }
     kurtosys =  kurtosys/count;
     skewness =  skewness/count;
+    if (k==1){
+        f.sd = sd;
+        f.variance = variance;
+        f.rms = rms;
+        f.m_sq = m_sq;
+        f.p_skewness = p_skewness;
+        f.kurtosys = kurtosys;
+        f.skewness = skewness;
+        f.med_0 = med[0];
+        f.med = med[count-1];
+        f.mean = mean;
+        f.median = median;
+        f.medianad = medianad;
+    }
+    if (k==2){
+        f.sd_2 = sd;
+        f.variance_2 = variance;
+        f.rms_2 = rms;
+        f.m_sq_2 = m_sq;
+        f.p_skewness_2 = p_skewness;
+        f.kurtosys_2 = kurtosys;
+        f.skewness_2 = skewness;
+        f.med_0_2 = med[0];
+        f.med_2 = med[count-1];
+        f.mean_2 = mean;
+        f.median_2 = median;
+        f.medianad_2 = medianad;
+    }
 
     ui->textBrowser_6->insertPlainText("        standart deviation =  "+QString::number(sd)+"\n");
     ui->textBrowser_6->insertPlainText("        variance =  "+QString::number(variance)+"\n");
@@ -387,7 +482,7 @@ void  MainWindow::Standartfunction (double med[],int count)
     ui->textBrowser_6->insertPlainText("        medianAD =  "+QString::number(medianad)+"\n");
 }
 
-void MainWindow::Framessamples(QList<QList<Frame>> &data)
+void MainWindow::Framessamples(QList<QList<Frame>> &data,QList<QList<func>> &samples_func)
 {
     QList<QList<QList<Frame>>> samples;
     QFileInfo file(ui->lineEdit->text());
@@ -428,6 +523,7 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
 
    foreach(QList<QList<Frame>> devices,samples)
     {
+        QList<func> funcs;
         ui->textBrowser_5->insertPlainText("Устройство: " +devices[0][0].ta + ":\n");
         int k = 1;
         double mtu = 0;
@@ -487,6 +583,7 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
 
             }
             if (notpivotsize) pivotsize = 0;
+            func f;
             ui->textBrowser_6->insertPlainText("  Уникальные функции: \n");
             ui->textBrowser_6->insertPlainText("    pivot size: " + QString::number(pivotsize) + " \n");
             double pm = pivotsize/mtu;
@@ -494,13 +591,147 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data)
             double pt = pivotsize/allsize;
             ui->textBrowser_6->insertPlainText("    PT: " + QString::number(pt) + " \n");
             ui->textBrowser_6->insertPlainText("\n  Стандартные функции по размерам пакетов: \n");
-            Standartfunction(med,count);
+            Standartfunction(med,count,f,1);
             ui->textBrowser_6->insertPlainText("\n  Стандартные функции по времени прибытия: \n");
-            Standartfunction(offsets,count);
+            Standartfunction(offsets,count,f,2);
+            f.ta = devices[0][0].ta;
+            f.ra = devices[0][0].ra;
+            f.pivotsize = pivotsize;
+            f.pm = pm;
+            f.pt = pt;
+            funcs.append(f);
         }
+        samples_func.append(funcs);
     }
 }
 
+void MainWindow::ML(QList<QList<func>> &samples_func)
+{
+    QString path = ui->lineEdit->text();
+    QRegularExpression f("/fram.+.log");
+    path.remove(f);
+    QFile file(path+"/func.log");
+    QStringList aStringList = allFileToString(file).split("\n");
+    size_t col_line = aStringList.size() - 1; // Count of line
+    size_t col_digits = aStringList.at(0).count(" ") + 1; // Count of digits in line
+    alglib::decisionforestbuilder builder;
+    alglib::ae_int_t nvars = 27;
+    alglib::ae_int_t nclasses = 2;
+    alglib::real_2d_array train;
+    alglib::ae_int_t npoints;
+    npoints = col_line;
+    train.setlength(npoints,nvars+1);
+    for (size_t i = 0; i < col_line; ++i) {
+           for (size_t j = 0; j < col_digits; ++j) {
+               train(i,j) = aStringList.at(i).split(" ").at(j).toInt();
+           }
+       }
+    dfbuildercreate(builder);
+    dfbuildersetdataset(builder, train, npoints, nvars, nclasses);
+    alglib::ae_int_t ntrees = 100;
+    alglib::decisionforest forest;
+    alglib::dfreport rep;
+    dfbuilderbuildrandomforest(builder, ntrees, forest, rep);
+    alglib::real_1d_array x;
+    x.setlength(27);
+    x(0) = samples_func[0][0].pivotsize;
+    x(1) = samples_func[0][0].pm;
+    x(2) = samples_func[0][0].pt;
+    x(3) = samples_func[0][0].sd;
+    x(4) = samples_func[0][0].variance;
+    x(5) = samples_func[0][0].rms;
+    x(6) = samples_func[0][0].m_sq;
+    x(7) = samples_func[0][0].p_skewness;
+    x(8) = samples_func[0][0].kurtosys;
+    x(9) = samples_func[0][0].skewness;
+    x(10) = samples_func[0][0].med_0;
+    x(11) = samples_func[0][0].med;
+    x(12) = samples_func[0][0].mean;
+    x(13) = samples_func[0][0].median;
+    x(14) = samples_func[0][0].medianad;
+    x(15) = samples_func[0][0].sd_2;
+    x(16) = samples_func[0][0].variance_2;
+    x(17) = samples_func[0][0].rms_2;
+    x(18) = samples_func[0][0].m_sq_2;
+    x(19) = samples_func[0][0].p_skewness_2;
+    x(20) = samples_func[0][0].kurtosys_2;
+    x(21) = samples_func[0][0].skewness_2;
+    x(22) = samples_func[0][0].med_0_2;
+    x(23) = samples_func[0][0].med_2;
+    x(24) = samples_func[0][0].mean_2;
+    x(25) = samples_func[0][0].median_2;
+    x(26) = samples_func[0][0].medianad_2;
+    alglib::real_1d_array e;
+    e.setlength(27);
+    e(0) = 0;
+    e(1) = 0;
+    e(2) = 0;
+    e(3) = 0;
+    e(4) = 0;
+    e(5) = 1554;
+    e(6) = 2.41492e+06;
+    e(7) = 0;
+    e(8) = 0;
+    e(9) = 0;
+    e(10) = 1554;
+    e(11) = 1554;
+    e(12) = 1554;
+    e(13) = 1554;
+    e(14) = 0;
+    e(15) = 0.0016463;
+    e(16) = 2.71031e-06;
+    e(17) = 8.22173;
+    e(18) = 67.5969;
+    e(19) = -751.188;
+    e(20) = 2.83257e+11;
+    e(21) = 1.30883e+07;
+    e(22) = 8.21924;
+    e(23) = 8.22482;
+    e(24) = 8.22173;
+    e(25) = 8.22241;
+    e(26) = 0;
+    alglib::ae_int_t i;
+    i = dfclassify(forest, e);
+    printf("%d\n", int(i));
+}
+
+void MainWindow::Savefunc(QList<QList<func>> &samples_func)
+{
+    QString path = ui->lineEdit->text();
+    QRegularExpression f("/fram.+.log");
+    path.remove(f);
+    QFile file(path+"/func.log");
+    if (file.open(QIODevice::WriteOnly))
+        {
+            QTextStream out(&file);
+            if (samples_func[0].count()>samples_func[1].count())
+            {
+            foreach (func f,samples_func[0])
+            {
+                if (ui->radioButton_3->isChecked())
+                {
+                out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " <<   " \n";
+                }
+                else if (ui->radioButton_2->isChecked()) {out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " << 0 <<   " \n";} else
+                    out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " << 1 <<   " \n";
+
+            }
+            }
+            else
+            {
+                foreach (func f,samples_func[1])
+                {
+                    if (ui->radioButton_3->isChecked())
+                    {
+                    out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " <<   " \n";
+                    }
+                    else if (ui->radioButton_2->isChecked()) {out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " << 0 <<   " \n";} else
+                        out << f.pivotsize << " " << f.pm << " " << f.pt << " " << f.sd << " " << f.variance << " " << f.rms << " " << f.m_sq << " " << f.p_skewness << " " << f.kurtosys << " " << f.skewness << " " << f.med_0 << " " << f.med << " " << f.mean  << " " << f.median << " " << f.medianad << " " << f.sd_2 << " " << f.variance_2 << " " << f.rms_2 << " " << f.m_sq_2 << " " << f.p_skewness_2 << " " << f.kurtosys_2 << " " << f.skewness_2 << " " << f.med_0_2 << " " << f.med_2 << " " << f.mean_2  << " " << f.median_2 << " " << f.medianad_2 << " " << 1 <<   " \n";
+                }
+            }
+        }
+
+}
 
 void MainWindow::on_pushButton_2_clicked()
 {
@@ -508,12 +739,21 @@ void MainWindow::on_pushButton_2_clicked()
     QList <Frame> frames;
     Graph graph;
     QList<QList<Frame>> data;
+    QList<QList<func>> samples_func;
     ReadLog(frames);
     Framesstat(frames,graph);
     Framesnet(graph);
     Framesdata(graph,data);
-    Framessamples(data);
+    Framessamples(data,samples_func);
+    Savefunc(samples_func);
+    //ML(samples_func);
     //    qDebug() <<  ;
 
 }
+
+
+
+
+
+
 
