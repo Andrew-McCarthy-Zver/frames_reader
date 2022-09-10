@@ -605,96 +605,6 @@ void MainWindow::Framessamples(QList<QList<Frame>> &data,QList<QList<func>> &sam
     }
 }
 
-void MainWindow::ML(QList<QList<func>> &samples_func)
-{
-    QString path = ui->lineEdit->text();
-    QRegularExpression f("/fram.+.log");
-    path.remove(f);
-    QFile file(path+"/func.log");
-    QStringList aStringList = allFileToString(file).split("\n");
-    size_t col_line = aStringList.size() - 1; // Count of line
-    size_t col_digits = aStringList.at(0).count(" ") + 1; // Count of digits in line
-    alglib::decisionforestbuilder builder;
-    alglib::ae_int_t nvars = 27;
-    alglib::ae_int_t nclasses = 2;
-    alglib::real_2d_array train;
-    alglib::ae_int_t npoints;
-    npoints = col_line;
-    train.setlength(npoints,nvars+1);
-    for (size_t i = 0; i < col_line; ++i) {
-           for (size_t j = 0; j < col_digits; ++j) {
-               train(i,j) = aStringList.at(i).split(" ").at(j).toInt();
-           }
-       }
-    dfbuildercreate(builder);
-    dfbuildersetdataset(builder, train, npoints, nvars, nclasses);
-    alglib::ae_int_t ntrees = 100;
-    alglib::decisionforest forest;
-    alglib::dfreport rep;
-    dfbuilderbuildrandomforest(builder, ntrees, forest, rep);
-    alglib::real_1d_array x;
-    x.setlength(27);
-    x(0) = samples_func[0][0].pivotsize;
-    x(1) = samples_func[0][0].pm;
-    x(2) = samples_func[0][0].pt;
-    x(3) = samples_func[0][0].sd;
-    x(4) = samples_func[0][0].variance;
-    x(5) = samples_func[0][0].rms;
-    x(6) = samples_func[0][0].m_sq;
-    x(7) = samples_func[0][0].p_skewness;
-    x(8) = samples_func[0][0].kurtosys;
-    x(9) = samples_func[0][0].skewness;
-    x(10) = samples_func[0][0].med_0;
-    x(11) = samples_func[0][0].med;
-    x(12) = samples_func[0][0].mean;
-    x(13) = samples_func[0][0].median;
-    x(14) = samples_func[0][0].medianad;
-    x(15) = samples_func[0][0].sd_2;
-    x(16) = samples_func[0][0].variance_2;
-    x(17) = samples_func[0][0].rms_2;
-    x(18) = samples_func[0][0].m_sq_2;
-    x(19) = samples_func[0][0].p_skewness_2;
-    x(20) = samples_func[0][0].kurtosys_2;
-    x(21) = samples_func[0][0].skewness_2;
-    x(22) = samples_func[0][0].med_0_2;
-    x(23) = samples_func[0][0].med_2;
-    x(24) = samples_func[0][0].mean_2;
-    x(25) = samples_func[0][0].median_2;
-    x(26) = samples_func[0][0].medianad_2;
-    alglib::real_1d_array e;
-    e.setlength(27);
-    e(0) = 0;
-    e(1) = 0;
-    e(2) = 0;
-    e(3) = 0;
-    e(4) = 0;
-    e(5) = 1554;
-    e(6) = 2.41492e+06;
-    e(7) = 0;
-    e(8) = 0;
-    e(9) = 0;
-    e(10) = 1554;
-    e(11) = 1554;
-    e(12) = 1554;
-    e(13) = 1554;
-    e(14) = 0;
-    e(15) = 0.0016463;
-    e(16) = 2.71031e-06;
-    e(17) = 8.22173;
-    e(18) = 67.5969;
-    e(19) = -751.188;
-    e(20) = 2.83257e+11;
-    e(21) = 1.30883e+07;
-    e(22) = 8.21924;
-    e(23) = 8.22482;
-    e(24) = 8.22173;
-    e(25) = 8.22241;
-    e(26) = 0;
-    alglib::ae_int_t i;
-    i = dfclassify(forest, e);
-    printf("%d\n", int(i));
-}
-
 void MainWindow::Savefunc(QList<QList<func>> &samples_func)
 {
     QString path = ui->lineEdit->text();
@@ -746,7 +656,6 @@ void MainWindow::on_pushButton_2_clicked()
     Framesdata(graph,data);
     Framessamples(data,samples_func);
     Savefunc(samples_func);
-    //ML(samples_func);
     //    qDebug() <<  ;
 
 }

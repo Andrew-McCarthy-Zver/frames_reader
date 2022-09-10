@@ -35,7 +35,6 @@ private slots:
     void Framesdata(Graph &graph,QList<QList<Frame>> &data);
     void Framessamples(QList<QList<Frame>> &data, QList<QList<func>> &samples_func);
     void Standartfunction(double med[],int count,func &f,int k);
-    void ML(QList<QList<func>> &samples_func);
     void Savefunc(QList<QList<func>> &samples_func);
     void on_pushButton_3_clicked();
 
@@ -46,7 +45,6 @@ private slots:
     void on_pushButton_6_clicked();
 
     void on_pushButton_7_clicked();
-
 
     void on_pushButton_8_clicked();
 
